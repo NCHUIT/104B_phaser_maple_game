@@ -18,6 +18,7 @@
     <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js" charset="utf-8"></script>
     <script src="phaser_nchuit_helper.js" charset="utf-8"></script>
     <script>
+
         var game = {
           new: function(witdh, height, canvas_selector){
             this.phaser = new Phaser.Game(witdh, height, Phaser.AUTO, canvas_selector, this)
@@ -129,6 +130,7 @@
             // 3. executed 30 times per second, pushing the game forward//  Collide the player and the stars with the platforms
             var touching_ground = phaser.physics.arcade.collide(player, layer);
             phaser.physics.arcade.collide(stars, layer);
+
             
 
             //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
@@ -143,6 +145,13 @@
                 player.body.velocity.x = -150;
 
                 player.animations.play('left');
+
+                if (!touching_ground) {
+                    player.animations.stop();
+                    if (player.frame < 4) {
+                        player.frame = 0;
+                    }
+                }
             }
             else if (cursors.right.isDown)
             {
@@ -150,6 +159,13 @@
                 player.body.velocity.x = 150;
 
                 player.animations.play('right');
+
+                if (!touching_ground) {
+                    player.animations.stop();
+                    if (player.frame >= 4) {
+                        player.frame = 8;
+                    }
+                }
             }
             //  Allow the player to jump if they are touching the ground.
             
@@ -160,7 +176,7 @@
                 if (player.frame < 4) {
                 player.frame = 3;
                 }
-                if (player.frame > 4) {
+                if (player.frame >= 4) {
                 player.frame = 5;
                 }
             }
@@ -187,7 +203,7 @@
         jQuery(document).ready(function($) {
           game.new($(document).width(), $(document).height(), 'game');
         });
-
+                
     </script>
 
 
