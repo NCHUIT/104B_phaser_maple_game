@@ -84,7 +84,7 @@
             player.body.checkCollision.right = false;
 
             //----------------------------
-            var monster = phaser.add.sprite(50, 150, 'baddie');
+            var monster = phaser.add.sprite(100, 350, 'baddie');
             phaser.physics.arcade.enable(monster);
             monster.body.bounce.y = 0.2;
             monster.body.gravity.y = 300;
@@ -97,6 +97,9 @@
             monster.body.checkCollision.up = false;
             monster.body.checkCollision.left = false;
             monster.body.checkCollision.right = false;
+
+            monster.body.velocity.x = 100;
+            monster.animations.play('right');
 
             //----------------------------
 
@@ -164,6 +167,7 @@
 
                 player.animations.play('left');
 
+                // stop in the air
                 if (!touching_ground) {
                     player.animations.stop();
                     if (player.frame < 4) {
@@ -206,8 +210,15 @@
 
 
             // monster behavior
-            monster.body.velocity.x = 100;
-            monster.animations.play('right');
+            // console.log(monster.body.x)
+            if (monster.body.x >  350) {
+                monster.body.velocity.x = -100;
+                monster.animations.play('left');
+            }
+            if (monster.body.x < 180) {
+                monster.body.velocity.x = 100;
+                monster.animations.play('right');
+            }
             
              
             
