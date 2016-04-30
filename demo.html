@@ -27,69 +27,59 @@
             var phaser = this.phaser;
             phaser.load.image('sky', 'assets/bg.jpg');
             phaser.load.image('star', 'assets/star.png');
-            phaser.load.spritesheet('dude', 'assets/dude2.png', 95, 160);
-            phaser.load.spritesheet('baddie', 'assets/baddie.png', 32, 32);  
+            phaser.load.spritesheet('player', 'assets/player.png', 95, 160);
+            phaser.load.spritesheet('monster', 'assets/baddie.png', 32, 32);  
             phaser.load.tilemap('map', 'tilemap/map.json', null, Phaser.Tilemap.TILED_JSON);
             phaser.load.image('kenney', 'tilemap/kenney.png');
 
           },
           create: function(){
             var phaser = this.phaser;
-            // 2. create and put objects into the game
+            //  create and put objects into the game
             //  We're going to be using physics, so enable the Arcade Physics system
             phaser.physics.startSystem(Phaser.Physics.ARCADE);
 
-            //  A simple background for our game
             var background = phaser.add.sprite(0, 0, 'sky');
             // background.height = layer.height
             // background.width = layer.width
 
-            //----------------------------------------------
-            // add the map
+            // 加入地圖
             var map = phaser.add.tilemap('map');
             map.addTilesetImage('kenney');
-            // set collision properties
+            // 設定"碰撞"性質
             map.setCollision(PhaserHelper.getCollisionIndexes(phaser, 'map'));
 
-            // make the collision layer from the map
             var layer = map.createLayer('layer1');
-            // set the world size according to the map
             layer.bringToTop();
             layer.resizeWorld();
-            //------------------------------------------------
+
             var tiles = map.layers[0].data
-            for (var i = tiles.length - 1; i >= 0; i--) {
-                for (var j = tiles[i].length - 1; j >= 0; j--) {
-                    // console.log(tiles[i][j].properties);
-                }
-            }
 
             background.height = layer.height
             background.width = layer.width
 
-            // The player and its settings
-            var player = phaser.add.sprite(32, 150, 'dude');
-            player.scale.setTo(0.7,0.7)
+            // 加入人物
+            var player = phaser.add.sprite(32, 150, 'player');
+            player.scale.setTo(0.7,0.7) //設定人物的大小
 
-            //  We need to enable physics on the player
+            // 啟用人物的物理效果
             phaser.physics.arcade.enable(player);
 
-            //  Player physics properties. Give the little guy a slight bounce.
+            // y軸加速度
             player.body.gravity.y = 1200;
-            player.body.collideWorldBounds = true;
 
-            //  Our two animations, walking left and right.
+            // 向左向右 人物移動時的動畫效果
             player.animations.add('left', [0, 1, 2, 3], 10, true);
             player.animations.add('right', [5, 6, 7, 8], 10, true);
             player.bringToTop
             phaser.camera.follow(player);
-
+            // 地圖碰撞
             player.body.checkCollision.up = false;
             player.body.checkCollision.left = false;
             player.body.checkCollision.right = false;
 
-            //----------------------------
-            var monster = phaser.add.sprite(100, 350, 'baddie');
+
+            var monster = phaser.add.sprite(100, 350, 'monster');
             phaser.physics.arcade.enable(monster);
             monster.body.bounce.y = 0.2;
             monster.body.gravity.y = 300;
@@ -98,7 +88,6 @@
             monster.animations.add('left', [0, 1], 10, true);
             monster.animations.add('right', [2, 3], 10, true);
             monster.bringToTop;
-
             monster.body.checkCollision.up = false;
             monster.body.checkCollision.left = false;
             monster.body.checkCollision.right = false;
@@ -106,7 +95,6 @@
             monster.body.velocity.x = 100;
             monster.animations.play('right');
 
-            //----------------------------
 
             //  Finally some stars to collect
             var stars = phaser.add.group();
@@ -152,7 +140,8 @@
             var layer = this.layer;
             var stars = this.stars;
             var monster = this.monster;
-            // 3. executed 30 times per second, pushing the game forward//  Collide the player and the stars with the platforms
+            //  executed 30 times per second, pushing the game forward
+            //  Collide the player and the stars with the platforms
             var touching_ground = phaser.physics.arcade.collide(player, layer);
             phaser.physics.arcade.collide(stars, layer);
             phaser.physics.arcade.collide(monster, layer);
