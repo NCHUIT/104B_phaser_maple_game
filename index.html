@@ -2,7 +2,8 @@
 <html lang="en"> 
 <head> 
 	<meta charset="UTF-8" />
-    <title>MapleShit</title>
+    <title>MapleStory</title>
+    <link rel="shortcut icon" type="image/x-icon" href="http://i.imgur.com/PrMviU0.png"/>
     <style type="text/css">
         body {
             margin: 0;
@@ -24,7 +25,7 @@
           },
           preload: function(){
             var phaser = this.phaser;
-            phaser.load.image('sky', 'assets/sky.png');
+            phaser.load.image('sky', 'assets/bg.jpg');
             phaser.load.image('star', 'assets/star.png');
             phaser.load.spritesheet('dude', 'assets/dude2.png', 95, 160);
             phaser.load.spritesheet('baddie', 'assets/baddie.png', 32, 32);  
@@ -40,7 +41,9 @@
             phaser.physics.startSystem(Phaser.Physics.ARCADE);
 
             //  A simple background for our game
-            phaser.add.sprite(0, 0, 'sky');
+            var background = phaser.add.sprite(0, 0, 'sky');
+            // background.height = layer.height
+            // background.width = layer.width
 
             //----------------------------------------------
             // add the map
@@ -62,6 +65,9 @@
                 }
             }
 
+            background.height = layer.height
+            background.width = layer.width
+            
             // The player and its settings
             var player = phaser.add.sprite(32, 150, 'dude');
             player.scale.setTo(0.7,0.7)
