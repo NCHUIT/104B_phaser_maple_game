@@ -35,17 +35,15 @@
           },
           create: function(){
             var phaser = this.phaser;
-            //  create and put objects into the game
-            //  We're going to be using physics, so enable the Arcade Physics system
+            //  啟用Arcade物理引擎
             phaser.physics.startSystem(Phaser.Physics.ARCADE);
 
+            //加入背景 並宣告背景物件
             var background = phaser.add.sprite(0, 0, 'sky');
-            // background.height = layer.height
-            // background.width = layer.width
 
-            // 加入地圖
+            // 加入地圖 宣告地圖物件
             var map = phaser.add.tilemap('map');
-            map.addTilesetImage('kenney');
+            map.addTilesetImage('kenney');  //kenny為地圖素材
             // 設定"碰撞"性質
             map.setCollision(PhaserHelper.getCollisionIndexes(phaser, 'map'));
 
@@ -55,17 +53,21 @@
 
             var tiles = map.layers[0].data
 
+            // 設定背景和地圖同大小
             background.height = layer.height
             background.width = layer.width
 
-            // 加入人物
+            // 加入人物並宣告player物件
             var player = phaser.add.sprite(32, 150, 'player');
             player.scale.setTo(0.7,0.7) //設定人物的大小
 
             // 啟用人物的物理效果
             phaser.physics.arcade.enable(player);
 
-            // y軸加速度
+            // 設定人物與世界邊界碰撞
+            player.body.collideWorldBounds = true;
+
+            // 設定重力場強度
             player.body.gravity.y = 1200;
 
             // 向左向右 人物移動時的動畫效果
@@ -73,12 +75,12 @@
             player.animations.add('right', [5, 6, 7, 8], 10, true);
             player.bringToTop
             phaser.camera.follow(player);
-            // 地圖碰撞
+            // 設定地圖中方塊的碰撞面
             player.body.checkCollision.up = false;
             player.body.checkCollision.left = false;
             player.body.checkCollision.right = false;
 
-
+            //加入怪物 宣告怪物物件
             var monster = phaser.add.sprite(100, 350, 'monster');
             phaser.physics.arcade.enable(monster);
             monster.body.bounce.y = 0.2;
@@ -96,33 +98,34 @@
             monster.animations.play('right');
 
 
-            //  Finally some stars to collect
+            //  加入group 宣告整個為stars物件
             var stars = phaser.add.group();
 
-            //  We will enable physics for any star that is created in this group
+            //  為group裡的每顆星星套上物理引擎
             stars.enableBody = true;
             stars.bringToTop;
 
-            //  Here we'll create 12 of them evenly spaced apart
+            //  等距離橫向分布12顆星星
             for (var i = 0; i < 12; i++)
             {
-                //  Create a star inside of the 'stars' group
+                //  加入星星 設定座標
                 var star = stars.create(i * 70, 0, 'star');
 
-                //  Let gravity do its thing
+                //  為stars設定重力場
                 star.body.gravity.y = 300;
 
-                //  This just gives each star a slightly random bounce value
+                //  利用Math.random()給予每顆星星不同的彈力
                 star.body.bounce.y = 0.7 + Math.random() * 0.2;
             }
 
-            //  The score
+            //  左上角加入一個記分板
             this.score = 0;
             var scoreText = phaser.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
 
-            //  Our controls.
+            //  加入鍵盤控制
             var cursors = phaser.input.keyboard.createCursorKeys();
 
+            // 宣告以下物件，因為他們還會被其他function使用到
             this.map = map;
             this.layer = layer;
             this.tiles = tiles;
@@ -134,44 +137,43 @@
             
           },
           update: function(){
+            // update將會以每秒三十次的速度更新畫面
+
+            // 宣告之前使用過的物件
             var phaser = this.phaser;
             var cursors = this.cursors;
             var player = this.player;
             var layer = this.layer;
             var stars = this.stars;
             var monster = this.monster;
-            //  executed 30 times per second, pushing the game forward
-            //  Collide the player and the stars with the platforms
+            //  人物與地圖物件之間的碰撞
             var touching_ground = phaser.physics.arcade.collide(player, layer);
             phaser.physics.arcade.collide(stars, layer);
             phaser.physics.arcade.collide(monster, layer);
 
-            
-
-            //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
+            //  偵測人物與星星，如果重疊將會call collectStar function來計算分數
             phaser.physics.arcade.overlap(player, stars, this.collectStar, null, this);
 
-            //  Reset the players velocity (movement)
+            //  人物的初速度
             player.body.velocity.x = 0;
 
-            if (cursors.left.isDown)
+            if (cursors.left.isDown) //若按壓左鍵
             {
-                //  Move to the left
+                //  以-150的速度移動
                 player.body.velocity.x = -150;
 
                 player.animations.play('left');
 
-                // stop in the air
+                // 若未觸地則stop
                 if (!touching_ground) {
                     player.animations.stop();
-                    if (player.frame < 4) {
+                    if (player.frame < 4) {  //設定人物的面向
                         player.frame = 0;
                     }
                 }
             }
             else if (cursors.right.isDown)
             {
-                //  Move to the right
                 player.body.velocity.x = 150;
 
                 player.animations.play('right');
@@ -183,28 +185,25 @@
                     }
                 }
             }
-            //  Allow the player to jump if they are touching the ground.
-            
             else
             {
-                //  Stand still
+                //  若未按壓任何按鍵時
                 player.animations.stop();
-                if (player.frame < 4) {
+                if (player.frame < 4) { //設定人物面向
                     player.frame = 3;
                 }
                 if (player.frame >= 4) {
                     player.frame = 5;
                 }
             }
-
+                // 觸地瞬間跳躍
             if (cursors.up.isDown && touching_ground)
             {
                 player.body.velocity.y = -720;
             }
 
 
-            // monster behavior
-            // console.log(monster.body.x)
+            // 怪物的行為
             if (monster.body.x >  350) {
                 monster.body.velocity.x = -100;
                 monster.animations.play('left');
@@ -220,12 +219,9 @@
           },
           collectStar: function(player, star){
             var phaser = this.phaser;
-            // var star = this.star;
             var scoreText = this.scoreText;
-            // Removes the star from the screen
             star.kill();
 
-            //  Add and update the score
             this.score += 10;
             scoreText.text = 'Score: ' + this.score;
 
