@@ -40,7 +40,7 @@
 
 			//加入背景 並宣告背景物件
 			var background = phaser.add.sprite(0, 0, 'sky');
-			background.fixedToCamera = true; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			// background.fixedToCamera = true; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 			// 加入地圖 宣告地圖物件
 			var map = phaser.add.tilemap('map');
@@ -99,6 +99,7 @@
 			this.player = player;
 			this.stars = stars;
 
+			// ======================  賦予怪物生命  ========================
 			//pay attention to the declaration form and order!!!
 			//注意宣告方式以及順序
 			this.pointer_down = false;
@@ -108,7 +109,7 @@
 			this.arrows = [];
 			this.monsters = [];
 			this.firetime = 0;
-			// =============================================================
+
 			for (var i = 0; i <= 10; i++) {
 				//加入怪物 宣告怪物物件
 				var x = phaser.world.randomX;
@@ -148,8 +149,7 @@
 					alive : true
 				})
 			}
-			// ===========================================================
-			//  左上角加入一個記分板
+			// ==========================  左上角加入一個記分板  =======================
 			var blood = this.phaser.add.text(16, 16, 'Health:', { fontSize: '32px' });
 			blood.fixedToCamera = true;
 			blood.font = 'Arial';
@@ -222,12 +222,12 @@
 				}
 			}
 
-			// 發射動畫
+			// ===============  發射動畫  ================
 			// 延長射擊時間
-			this.firetime-=1;
+			this.firetime -= 1;
 
 			// 按著滑鼠左鍵時出現拉弓動作
-			if (game.input.activePointer.isDown && this.firetime<=0) 
+			if (game.input.activePointer.isDown && this.firetime <= 0) 
 			{
 				this.pointer_down = true;
 				if(player.frame < 6)
@@ -246,7 +246,7 @@
 				{
 					player.frame = 0;
 					this.fire(fire_point.x, fire_point.y, rotation);
-					this.firetime=30;
+					this.firetime = 30;
 				}
 				else if(player.frame >= 6 && Math.abs(rotation) < Math.PI / 2)
 				{
@@ -255,6 +255,7 @@
 					this.firetime = 30;
 				}
 			}
+			// ===============  發射動畫END  ===============
 			// 觸地瞬間跳躍
 			if (game.input.keyboard.isDown(Phaser.Keyboard.W) && touching_ground)
 			{
@@ -278,7 +279,7 @@
 					{
 						phaser.physics.arcade.overlap(player, monsters[i].monster, function(){
 							this.player.Health -= 8;
-							this.player.killMeCD = 30;
+							this.player.killMeCD = 60;
 							// console.log("cd: " + this.player.killMeCD);
 							// console.log("hp: " + this.player.Health);
 						},null,this);
@@ -327,13 +328,18 @@
 			this.showHealth();
 
 			// 隱藏版
-			// if (game.input.keyboard.isDown(Phaser.Keyboard.O))
-			// {
-			// 	monsters.forEach(function (e, i) {monsters[i].monster.kill();});
-			// 	this.monsterTotalHealth = 0;
-			// 	this.player.Health = "Ultra";
-			// 	this.fire(0, 460, 0, "o");
-			// }
+			if (game.input.keyboard.isDown(Phaser.Keyboard.O))
+			{
+				monsters.forEach(function (e, i) {monsters[i].monster.kill();});
+				this.monsterTotalHealth = 0;
+				this.player.Health = "Ultra";
+				this.fire(0, 460, 0, "o");
+				this.firetime = 30;
+			}
+		},
+		collectStar: function (player, star){
+			star.kill();
+			this.player.Health += 10;
 		},
 		fire :  function  (x, y, rotation, o) {
 
@@ -343,20 +349,17 @@
 			arrow.currentSpeed = 500;
 			arrow.anchor.setTo(-0.5, -0.5);
 			phaser.physics.arcade.enable(arrow);
-			// if (o == "o") {
-			// 	arrow.scale.setTo(5, 5);
-			// 	arrow.currentSpeed = 1200;
-			// }
+			if (o == "o") {
+				arrow.scale.setTo(5, 5);
+				arrow.currentSpeed = 1200;
+			}
 			phaser.physics.arcade.velocityFromRotation(arrow.rotation, arrow.currentSpeed, arrow.body.velocity);  
 			// 用發射點與滑鼠之間的角度來產生速度
 			arrow.outOfBoundsKill = true;
 			this.arrows.push(arrow);
 		},
-		collectStar: function (player, star){
-			star.kill();
-			this.player.Health += 10;
-		},
 		createText: function (text, result) {
+			//  遊戲結果訊息
 			var color;
 			if(result == 'w')          //贏了
 				color = '#17EAD9';
