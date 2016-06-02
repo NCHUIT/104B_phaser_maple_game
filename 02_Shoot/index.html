@@ -99,7 +99,7 @@
 			this.player = player;
 			this.stars = stars;
 
-			// ======================  賦予怪物生命  ========================
+			// ===============  賦予怪物生命 & basics ===============
 			//pay attention to the declaration form and order!!!
 			//注意宣告方式以及順序
 			this.pointer_down = false;
@@ -126,7 +126,7 @@
 				//怪物移動時的動畫效果及碰撞
 				monster.animations.add('left', [0, 1], 10, true); 
 				monster.animations.add('right', [2, 3], 10, true);
-				monster.bringToTop;
+				monster.bringToTop();
 				monster.body.checkCollision.up = false;
 				monster.body.checkCollision.left = true;
 				monster.body.checkCollision.right = true;
@@ -149,7 +149,7 @@
 					alive : true
 				})
 			}
-			// ==========================  左上角加入一個記分板  =======================
+			// =================  左上角加入一個記分板  ================
 			var blood = this.phaser.add.text(16, 16, 'Health:', { fontSize: '32px' });
 			blood.fixedToCamera = true;
 			blood.font = 'Arial';
@@ -221,7 +221,11 @@
 					player.frame = 7;
 				}
 			}
-
+			// 觸地瞬間跳躍
+			if (game.input.keyboard.isDown(Phaser.Keyboard.W) && touching_ground)
+			{
+				player.body.velocity.y = -720;
+			}
 			// ===============  發射動畫  ================
 			// 延長射擊時間
 			this.firetime -= 1;
@@ -241,7 +245,7 @@
 				this.pointer_down = false;
 				var fire_point = {x: player.x + 33, y: player.y + 48};  // 設定發射點
 				var rotation = phaser.physics.arcade.angleToPointer(fire_point);    // 設定發射點與滑鼠之間的角度
-
+				console.log(rotation);
 				if(player.frame < 6 && Math.abs(rotation) > Math.PI / 2)
 				{
 					player.frame = 0;
@@ -256,14 +260,9 @@
 				}
 			}
 			// ===============  發射動畫END  ===============
-			// 觸地瞬間跳躍
-			if (game.input.keyboard.isDown(Phaser.Keyboard.W) && touching_ground)
-			{
-				player.body.velocity.y = -720;
-			}
-			// ===========================  人物控制結束     ===================================
+			// ================  人物控制結束   ================
 
-			// ===========================  怪物的AI ===================================
+			// ===================  怪物的AI  =====================
 			this.monsterRunningCount --;  // 用來改變方向 
 			this.player.killMeCD --;  // 怕你死太快 XD
 
@@ -310,23 +309,15 @@
 					}
 				}
 			}
-			// ======================================================================
-			// 另類血條
+			// ======================  left & right  =====================
 			if (this.monsterRunningCount < 0) {
 				this.monsterRunningCount = 120;
 			}
-			if (this.player.Health < 0) {
-				player.kill();
-				this.player.Health = "Dead";
-				this.createText("You Lose (;´༎ຶД༎ຶ`)",'l');     // use createText function to create texts
-			}
-			if (this.monsterTotalHealth == 0)
-				this.createText("You Win (●´ω｀●)ゞ",'w');     // use createText function to create texts
-
-			// =============================  AI 結束  ===============================
-			// show 出血量
+			// =========================  AI 結束  ========================
+			// =======================  show 出血量  ======================
 			this.showHealth();
 
+			// ============================================================
 			// 隱藏版
 			if (game.input.keyboard.isDown(Phaser.Keyboard.O))
 			{
@@ -341,22 +332,27 @@
 			star.kill();
 			this.player.Health += 10;
 		},
-		fire :  function  (x, y, rotation, o) {
-
-			// 放箭要做的事情 +.+
-			var phaser = this.phaser;
-			var arrow = phaser.add.sprite(x, y, 'arrow');
-			arrow.currentSpeed = 500;
-			arrow.anchor.setTo(-0.5, -0.5);
-			phaser.physics.arcade.enable(arrow);
-			if (o == "o") {
-				arrow.scale.setTo(5, 5);
-				arrow.currentSpeed = 1200;
+		showHealth: function() {
+			var color;
+			// ======================  變更血條顏色  ========================
+			if (this.player.Health < 40 || this.player.Health == "Dead")
+				color = '#DA1212';
+			else if (this.player.Health >= 40 && this.player.Health < 80)
+				color = '#E4663A';
+			else if ((this.player.Health >= 80 && this.player.Health < 120) || this.player.Health == "Ultra")
+				color = '#17E7A4';
+			
+			// ========================  結果訊息  =======================
+			if (this.monsterTotalHealth == 0)
+				this.createText("You Win (●´ω｀●)ゞ",'w');
+			if (this.player.Health < 0) {
+				this.player.kill();
+				this.player.Health = "Dead";
+				this.createText("You Lose (;´༎ຶД༎ຶ`)",'l');
+				// use createText function to create texts
 			}
-			phaser.physics.arcade.velocityFromRotation(arrow.rotation, arrow.currentSpeed, arrow.body.velocity);  
-			// 用發射點與滑鼠之間的角度來產生速度
-			arrow.outOfBoundsKill = true;
-			this.arrows.push(arrow);
+			this.blood.text = 'Health: ' + this.player.Health;
+			this.blood.fill = color;
 		},
 		createText: function (text, result) {
 			//  遊戲結果訊息
@@ -371,18 +367,22 @@
 			note.align = 'center';
 			note.setShadow(2, 2, '#3E3E3E', 1);
 		},
-		showHealth: function() {
-			//  變更血條顏色
-			var color;
-			if (this.player.Health < 40 || this.player.Health == "Dead")
-				color = '#DA1212';
-			else if (this.player.Health >= 40 && this.player.Health < 80)
-				color = '#E4663A';
-			else if ((this.player.Health >= 80 && this.player.Health < 120) || this.player.Health == "Ultra")
-				color = '#17E7A4';
-			
-			this.blood.text = 'Health: ' + this.player.Health;
-			this.blood.fill = color;
+		fire :  function  (x, y, rotation, o) {
+			// 放箭要做的事情 +.+
+			var phaser = this.phaser;
+			var arrow = phaser.add.sprite(x, y, 'arrow');
+			arrow.rotation = rotation;
+			arrow.currentSpeed = 2250;
+			arrow.anchor.setTo(-0.5, -0.5);
+			phaser.physics.arcade.enable(arrow);
+			if (o == "o") {
+				arrow.scale.setTo(5, 5);
+				arrow.currentSpeed = 1200;
+			}
+			phaser.physics.arcade.velocityFromRotation(arrow.rotation, arrow.currentSpeed, arrow.body.velocity);  
+			// 用發射點與滑鼠之間的角度來產生速度
+			arrow.outOfBoundsKill = true;
+			this.arrows.push(arrow);
 		}};
 
 		jQuery(document).ready(function($) {
