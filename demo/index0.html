@@ -11,7 +11,7 @@
 	</style>
 </head>
 <body>
-<div id="game"></div>
+<div id="game">
 	<script src="http://code.jquery.com/jquery-1.12.0.min.js" charset="utf-8"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/2.4.6/phaser.min.js" charset="utf-8"></script>
 	<script src="arcade.slope.js" charset="utf-8"></script>
@@ -120,8 +120,8 @@
 					x = 200;
 				var monster = phaser.add.sprite( x, y - 350, 'monster');
 				phaser.physics.arcade.enable(monster);
-				monster.body.bounce.y = 0.2;
-				monster.body.gravity.y = 300;
+				monster.body.bounce.y = 0.5;
+				monster.body.gravity.y = 500;
 				monster.body.collideWorldBounds = true;
 
 				//怪物移動時的動畫效果及碰撞
@@ -315,7 +315,7 @@
 			}
 			// ======================  left & right  =====================
 			if (this.monsterRunningCount < 0) {
-				this.monsterRunningCount = 90;
+				this.monsterRunningCount = 85;
 			}
 			// =========================  AI 結束  ========================
 			// =======================  show 出血量  ======================
@@ -396,6 +396,6 @@
 		});
 
 	</script>
-
+</div>
 </body>
 </html>
